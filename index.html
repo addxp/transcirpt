@@ -36,29 +36,19 @@
     content: '';
     position: fixed;
     inset: 0;
-    background-image:
-      repeating-linear-gradient(transparent, transparent 27px, var(--line) 28px);
+    background-image: repeating-linear-gradient(transparent, transparent 27px, var(--line) 28px);
     pointer-events: none;
     z-index: 0;
   }
 
-  .wrap {
-    width: 100%;
-    max-width: 720px;
-    position: relative;
-    z-index: 1;
-  }
+  .wrap { width: 100%; max-width: 720px; position: relative; z-index: 1; }
 
-  header {
-    text-align: center;
-    margin-bottom: 3rem;
-  }
+  header { text-align: center; margin-bottom: 3rem; }
 
   header h1 {
     font-family: 'IM Fell English', serif;
     font-size: clamp(2rem, 5vw, 3.2rem);
     font-weight: 400;
-    letter-spacing: -0.01em;
     color: var(--ink);
     line-height: 1.1;
   }
@@ -71,15 +61,8 @@
     text-transform: uppercase;
   }
 
-  .divider {
-    width: 60px;
-    height: 1px;
-    background: var(--accent);
-    margin: 1rem auto;
-    opacity: 0.5;
-  }
+  .divider { width: 60px; height: 1px; background: var(--accent); margin: 1rem auto; opacity: 0.5; }
 
-  /* API key section */
   .api-section {
     background: var(--paper2);
     border: 1px solid var(--line);
@@ -89,15 +72,10 @@
     display: flex;
     gap: 10px;
     align-items: center;
+    flex-wrap: wrap;
   }
 
-  .api-section label {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-    white-space: nowrap;
-  }
+  .api-section label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); white-space: nowrap; }
 
   .api-section input {
     flex: 1;
@@ -113,6 +91,9 @@
   }
 
   .api-section input::placeholder { color: var(--text-muted); opacity: 0.6; }
+
+  .api-section small { font-size: 0.7rem; color: var(--text-muted); width: 100%; }
+  .api-section small a { color: var(--accent); }
 
   .api-save {
     background: var(--accent);
@@ -131,7 +112,6 @@
   .api-save:hover { background: var(--accent2); }
   .api-saved { font-size: 0.72rem; color: #4a7a40; letter-spacing: 0.05em; }
 
-  /* Drop zone */
   .drop-zone {
     border: 1.5px dashed var(--accent);
     border-radius: 4px;
@@ -143,36 +123,18 @@
     position: relative;
   }
 
-  .drop-zone:hover, .drop-zone.over {
-    background: var(--paper3);
-    border-color: var(--accent2);
-  }
+  .drop-zone:hover, .drop-zone.over { background: var(--paper3); border-color: var(--accent2); }
 
   .drop-zone input[type=file] {
     position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
   }
 
-  .drop-icon {
-    font-size: 2.5rem;
-    margin-bottom: 0.75rem;
-    opacity: 0.4;
-  }
+  .drop-icon { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.4; }
 
-  .drop-zone p {
-    font-family: 'IM Fell English', serif;
-    font-size: 1.1rem;
-    color: var(--accent);
-    margin-bottom: 0.25rem;
-  }
+  .drop-zone p { font-family: 'IM Fell English', serif; font-size: 1.1rem; color: var(--accent); margin-bottom: 0.25rem; }
 
-  .drop-zone small {
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
+  .drop-zone small { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; }
 
-  /* Preview */
   #imgPreview {
     display: none;
     width: 100%;
@@ -182,30 +144,11 @@
     box-shadow: 0 4px 24px rgba(90,60,20,0.12);
   }
 
-  /* Controls */
-  .controls {
-    display: flex;
-    gap: 10px;
-    margin-top: 1.5rem;
-    align-items: center;
-    flex-wrap: wrap;
-  }
+  .controls { display: flex; gap: 10px; margin-top: 1.5rem; align-items: center; flex-wrap: wrap; }
 
-  .line-input {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-    min-width: 160px;
-  }
+  .line-input { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 160px; }
 
-  .line-input label {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-    white-space: nowrap;
-  }
+  .line-input label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); white-space: nowrap; }
 
   .line-input input {
     width: 70px;
@@ -230,7 +173,6 @@
     cursor: pointer;
     border-radius: 3px;
     transition: background 0.2s, transform 0.1s;
-    letter-spacing: 0.02em;
   }
   .btn-transcribe:hover { background: var(--accent); }
   .btn-transcribe:active { transform: scale(0.98); }
@@ -252,35 +194,14 @@
   }
   .btn-clear:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* Status */
-  .status {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    margin-top: 0.75rem;
-    min-height: 1.2rem;
-    letter-spacing: 0.03em;
-  }
+  .status { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.75rem; min-height: 1.2rem; letter-spacing: 0.03em; }
   .status.error { color: var(--danger); }
 
-  /* Result */
-  .result-wrap {
-    display: none;
-    margin-top: 2rem;
-  }
+  .result-wrap { display: none; margin-top: 2rem; }
 
-  .result-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-  }
+  .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
 
-  .result-header span {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-  }
+  .result-header span { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
 
   .btn-copy {
     background: transparent;
@@ -322,24 +243,9 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  footer {
-    margin-top: 4rem;
-    text-align: center;
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    letter-spacing: 0.06em;
-    opacity: 0.6;
-  }
+  .paste-hint { margin-top: 0.5rem; font-size: 0.72rem; color: var(--text-muted); text-align: center; letter-spacing: 0.05em; text-transform: uppercase; }
 
-  /* Paste overlay hint */
-  .paste-hint {
-    margin-top: 0.5rem;
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    text-align: center;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
+  footer { margin-top: 4rem; text-align: center; font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.06em; opacity: 0.6; }
 </style>
 </head>
 <body>
@@ -353,10 +259,11 @@
   </header>
 
   <div class="api-section">
-    <label>Chave API</label>
-    <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
+    <label>Chave Gemini</label>
+    <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off">
     <button class="api-save" onclick="saveKey()">Salvar</button>
     <span class="api-saved" id="keySaved" style="display:none">✓ salva</span>
+    <small>Chave gratuita em <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a> → "Get API Key"</small>
   </div>
 
   <div class="drop-zone" id="dropZone">
@@ -366,7 +273,7 @@
     <small>ou clique para selecionar · JPG, PNG, WEBP</small>
   </div>
 
-  <p class="paste-hint">Ou cole a imagem com Ctrl+V em qualquer lugar da página</p>
+  <p class="paste-hint">Ou cole com Ctrl+V em qualquer lugar da página</p>
 
   <img id="imgPreview" alt="Manuscrito carregado">
 
@@ -391,16 +298,15 @@
     <div class="result-box" id="resultBox"></div>
   </div>
 
-  <footer>Powered by Claude · Anthropic</footer>
+  <footer>Powered by Gemini · Google AI</footer>
 
 </div>
 
 <script>
 let imgBase64 = null;
-let imgType = null;
+let imgMime = null;
 
-// Load saved key
-const saved = localStorage.getItem('anthropic_key');
+const saved = localStorage.getItem('gemini_key');
 if (saved) {
   document.getElementById('apiKey').value = saved;
   document.getElementById('keySaved').style.display = 'inline';
@@ -409,31 +315,26 @@ if (saved) {
 function saveKey() {
   const k = document.getElementById('apiKey').value.trim();
   if (!k) return;
-  localStorage.setItem('anthropic_key', k);
+  localStorage.setItem('gemini_key', k);
   document.getElementById('keySaved').style.display = 'inline';
 }
 
-// Drag & drop
 const dz = document.getElementById('dropZone');
 dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
 dz.addEventListener('dragleave', () => dz.classList.remove('over'));
 dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('over'); handleFile(e.dataTransfer.files[0]); });
 
-// Paste anywhere
 document.addEventListener('paste', e => {
   const items = e.clipboardData?.items;
   if (!items) return;
   for (const item of items) {
-    if (item.type.startsWith('image/')) {
-      handleFile(item.getAsFile());
-      break;
-    }
+    if (item.type.startsWith('image/')) { handleFile(item.getAsFile()); break; }
   }
 });
 
 function handleFile(file) {
   if (!file || !file.type.startsWith('image/')) return;
-  imgType = file.type;
+  imgMime = file.type;
   const reader = new FileReader();
   reader.onload = e => {
     imgBase64 = e.target.result.split(',')[1];
@@ -450,8 +351,8 @@ function handleFile(file) {
 }
 
 async function transcribe() {
-  const apiKey = document.getElementById('apiKey').value.trim() || localStorage.getItem('anthropic_key');
-  if (!apiKey) { setStatus('Insira sua chave de API da Anthropic.', true); return; }
+  const apiKey = document.getElementById('apiKey').value.trim() || localStorage.getItem('gemini_key');
+  if (!apiKey) { setStatus('Insira sua chave de API do Gemini.', true); return; }
   if (!imgBase64) return;
 
   const lineNum = document.getElementById('lineNum').value;
@@ -476,32 +377,28 @@ Instruções:
   setStatus('<span class="spinner"></span>Transcrevendo...', false, true);
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1500,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: imgType, data: imgBase64 } },
-            { type: 'text', text: prompt }
-          ]
-        }]
-      })
-    });
+    const resp = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { inline_data: { mime_type: imgMime, data: imgBase64 } },
+              { text: prompt }
+            ]
+          }]
+        })
+      }
+    );
 
     const data = await resp.json();
+
     if (data.error) { setStatus('Erro: ' + data.error.message, true); return; }
 
-    const text = (data.content || []).map(b => b.text || '').join('\n').trim();
-    document.getElementById('resultBox').textContent = text || 'Não foi possível transcrever.';
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Não foi possível transcrever.';
+    document.getElementById('resultBox').textContent = text;
     setStatus('Transcrição concluída.');
   } catch(err) {
     setStatus('Erro de conexão. Verifique sua chave e tente novamente.', true);
@@ -518,15 +415,14 @@ function setStatus(msg, isError = false, isHtml = false) {
 }
 
 function copyText() {
-  const text = document.getElementById('resultBox').textContent;
-  navigator.clipboard.writeText(text).then(() => {
+  navigator.clipboard.writeText(document.getElementById('resultBox').textContent).then(() => {
     setStatus('Copiado!');
     setTimeout(() => setStatus(''), 2000);
   });
 }
 
 function clearAll() {
-  imgBase64 = null; imgType = null;
+  imgBase64 = null; imgMime = null;
   document.getElementById('imgPreview').style.display = 'none';
   document.getElementById('imgPreview').src = '';
   document.getElementById('transcribeBtn').disabled = true;
