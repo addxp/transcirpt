@@ -1,159 +1,541 @@
-
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transcritor de Manuscritos</title>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  .container { max-width: 680px; padding: 1.5rem 0; font-family: var(--font-sans); }
-  .upload-area { border: 1.5px dashed var(--color-border-secondary); border-radius: var(--border-radius-lg); padding: 2.5rem 1rem; text-align: center; cursor: pointer; transition: background 0.2s; background: var(--color-background-secondary); }
-  .upload-area:hover { background: var(--color-background-tertiary); }
-  .upload-area.dragover { border-color: #378ADD; background: #E6F1FB; }
-  #preview { max-width: 100%; border-radius: var(--border-radius-md); margin-top: 1rem; display: none; border: 0.5px solid var(--color-border-tertiary); }
-  .btn { background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 10px 20px; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.15s; color: var(--color-text-primary); }
-  .btn:hover { background: var(--color-background-secondary); }
-  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-  .btn-primary { background: var(--color-text-primary); color: var(--color-background-primary); border-color: var(--color-text-primary); }
-  .btn-primary:hover { opacity: 0.85; background: var(--color-text-primary); }
-  .result-box { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem; margin-top: 1.5rem; white-space: pre-wrap; font-size: 15px; line-height: 1.8; color: var(--color-text-primary); min-height: 80px; display: none; }
-  .label { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 6px; }
-  .status { font-size: 13px; color: var(--color-text-secondary); margin-top: 8px; min-height: 18px; }
-  .toolbar { display: flex; gap: 8px; margin-top: 1rem; flex-wrap: wrap; }
-  .line-option { display: flex; gap: 8px; align-items: center; margin-top: 1rem; }
-  input[type=number] { width: 70px; padding: 6px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); font-size: 14px; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1208;
+    --paper: #f5f0e8;
+    --paper2: #ede8da;
+    --paper3: #e3ddd0;
+    --accent: #7a4f2e;
+    --accent2: #b07840;
+    --line: rgba(90,60,20,0.15);
+    --text-muted: #7a6a50;
+    --danger: #8b2020;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 1rem 4rem;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(transparent, transparent 27px, var(--line) 28px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 720px;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  header h1 {
+    font-family: 'IM Fell English', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+
+  header p {
+    margin-top: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .divider {
+    width: 60px;
+    height: 1px;
+    background: var(--accent);
+    margin: 1rem auto;
+    opacity: 0.5;
+  }
+
+  /* API key section */
+  .api-section {
+    background: var(--paper2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .api-section label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .api-section input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--accent2);
+    padding: 4px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--ink);
+    outline: none;
+    min-width: 0;
+  }
+
+  .api-section input::placeholder { color: var(--text-muted); opacity: 0.6; }
+
+  .api-save {
+    background: var(--accent);
+    color: var(--paper);
+    border: none;
+    padding: 5px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .api-save:hover { background: var(--accent2); }
+  .api-saved { font-size: 0.72rem; color: #4a7a40; letter-spacing: 0.05em; }
+
+  /* Drop zone */
+  .drop-zone {
+    border: 1.5px dashed var(--accent);
+    border-radius: 4px;
+    background: var(--paper2);
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    position: relative;
+  }
+
+  .drop-zone:hover, .drop-zone.over {
+    background: var(--paper3);
+    border-color: var(--accent2);
+  }
+
+  .drop-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+
+  .drop-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.4;
+  }
+
+  .drop-zone p {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.1rem;
+    color: var(--accent);
+    margin-bottom: 0.25rem;
+  }
+
+  .drop-zone small {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* Preview */
+  #imgPreview {
+    display: none;
+    width: 100%;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+    margin-top: 1.5rem;
+    box-shadow: 0 4px 24px rgba(90,60,20,0.12);
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .line-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .line-input label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .line-input input {
+    width: 70px;
+    background: var(--paper2);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 6px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--ink);
+    outline: none;
+  }
+  .line-input input:focus { border-color: var(--accent); }
+
+  .btn-transcribe {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 10px 24px;
+    font-family: 'IM Fell English', serif;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.02em;
+  }
+  .btn-transcribe:hover { background: var(--accent); }
+  .btn-transcribe:active { transform: scale(0.98); }
+  .btn-transcribe:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-clear {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text-muted);
+    padding: 10px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: border-color 0.2s, color 0.2s;
+    display: none;
+  }
+  .btn-clear:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Status */
+  .status {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.75rem;
+    min-height: 1.2rem;
+    letter-spacing: 0.03em;
+  }
+  .status.error { color: var(--danger); }
+
+  /* Result */
+  .result-wrap {
+    display: none;
+    margin-top: 2rem;
+  }
+
+  .result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .result-header span {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+  }
+
+  .btn-copy {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text-muted);
+    padding: 4px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+
+  .result-box {
+    background: var(--paper2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1.5rem;
+    font-family: 'IM Fell English', serif;
+    font-size: 1.05rem;
+    line-height: 2;
+    color: var(--ink);
+    white-space: pre-wrap;
+    min-height: 100px;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border: 1.5px solid var(--accent);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  footer {
+    margin-top: 4rem;
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    opacity: 0.6;
+  }
+
+  /* Paste overlay hint */
+  .paste-hint {
+    margin-top: 0.5rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-align: center;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
 </style>
+</head>
+<body>
 
-<div class="container">
-  <h2 class="sr-only">Transcritor automático de manuscritos históricos</h2>
+<div class="wrap">
 
-  <p class="label">Envie uma imagem do manuscrito</p>
-  <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
-    <i class="ti ti-file-text" style="font-size:32px; color: var(--color-text-secondary);" aria-hidden="true"></i>
-    <p style="margin: 8px 0 4px; font-size: 15px; color: var(--color-text-primary);">Clique ou arraste uma imagem aqui</p>
-    <p style="margin: 0; font-size: 13px; color: var(--color-text-secondary);">JPG, PNG, WEBP até 10MB</p>
+  <header>
+    <h1>Transcritor de Manuscritos</h1>
+    <div class="divider"></div>
+    <p>Paleografia assistida por inteligência artificial</p>
+  </header>
+
+  <div class="api-section">
+    <label>Chave API</label>
+    <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
+    <button class="api-save" onclick="saveKey()">Salvar</button>
+    <span class="api-saved" id="keySaved" style="display:none">✓ salva</span>
   </div>
-  <input type="file" id="fileInput" accept="image/*" style="display:none">
-  <img id="preview" alt="Pré-visualização do manuscrito">
 
-  <div class="line-option">
-    <span style="font-size:13px; color: var(--color-text-secondary);">Transcrever linha específica (opcional):</span>
-    <input type="number" id="lineNum" placeholder="ex: 23" min="1">
-    <span style="font-size:13px; color: var(--color-text-secondary);">deixe vazio para transcrever tudo</span>
+  <div class="drop-zone" id="dropZone">
+    <input type="file" id="fileInput" accept="image/*" onchange="handleFile(this.files[0])">
+    <div class="drop-icon">📜</div>
+    <p>Solte a imagem aqui</p>
+    <small>ou clique para selecionar · JPG, PNG, WEBP</small>
   </div>
 
-  <div class="toolbar">
-    <button class="btn btn-primary" id="transcribeBtn" disabled onclick="transcribe()">
-      <i class="ti ti-wand" aria-hidden="true"></i> Transcrever
+  <p class="paste-hint">Ou cole a imagem com Ctrl+V em qualquer lugar da página</p>
+
+  <img id="imgPreview" alt="Manuscrito carregado">
+
+  <div class="controls">
+    <div class="line-input">
+      <label>Linha</label>
+      <input type="number" id="lineNum" placeholder="todas" min="1">
+    </div>
+    <button class="btn-transcribe" id="transcribeBtn" onclick="transcribe()" disabled>
+      Transcrever
     </button>
-    <button class="btn" id="copyBtn" style="display:none" onclick="copyText()">
-      <i class="ti ti-copy" aria-hidden="true"></i> Copiar
-    </button>
-    <button class="btn" id="clearBtn" style="display:none" onclick="clearAll()">
-      <i class="ti ti-refresh" aria-hidden="true"></i> Nova imagem
-    </button>
+    <button class="btn-clear" id="clearBtn" onclick="clearAll()">Nova imagem</button>
   </div>
+
   <p class="status" id="status"></p>
 
-  <div class="result-box" id="resultBox"></div>
+  <div class="result-wrap" id="resultWrap">
+    <div class="result-header">
+      <span>Transcrição</span>
+      <button class="btn-copy" onclick="copyText()">Copiar</button>
+    </div>
+    <div class="result-box" id="resultBox"></div>
+  </div>
+
+  <footer>Powered by Claude · Anthropic</footer>
+
 </div>
 
 <script>
-let imageBase64 = null;
-let imageType = null;
+let imgBase64 = null;
+let imgType = null;
 
-const uploadArea = document.getElementById('uploadArea');
-const fileInput = document.getElementById('fileInput');
-const preview = document.getElementById('preview');
-const transcribeBtn = document.getElementById('transcribeBtn');
-const resultBox = document.getElementById('resultBox');
-const status = document.getElementById('status');
+// Load saved key
+const saved = localStorage.getItem('anthropic_key');
+if (saved) {
+  document.getElementById('apiKey').value = saved;
+  document.getElementById('keySaved').style.display = 'inline';
+}
 
-uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
-uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
-fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+function saveKey() {
+  const k = document.getElementById('apiKey').value.trim();
+  if (!k) return;
+  localStorage.setItem('anthropic_key', k);
+  document.getElementById('keySaved').style.display = 'inline';
+}
+
+// Drag & drop
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('over'); handleFile(e.dataTransfer.files[0]); });
+
+// Paste anywhere
+document.addEventListener('paste', e => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      handleFile(item.getAsFile());
+      break;
+    }
+  }
+});
 
 function handleFile(file) {
-  if (!file || !file.type.startsWith('image/')) { status.textContent = 'Por favor, envie uma imagem válida.'; return; }
-  imageType = file.type;
+  if (!file || !file.type.startsWith('image/')) return;
+  imgType = file.type;
   const reader = new FileReader();
   reader.onload = e => {
-    imageBase64 = e.target.result.split(',')[1];
+    imgBase64 = e.target.result.split(',')[1];
+    const preview = document.getElementById('imgPreview');
     preview.src = e.target.result;
     preview.style.display = 'block';
-    uploadArea.style.display = 'none';
-    transcribeBtn.disabled = false;
-    resultBox.style.display = 'none';
-    document.getElementById('copyBtn').style.display = 'none';
-    document.getElementById('clearBtn').style.display = 'none';
-    status.textContent = '';
+    document.getElementById('transcribeBtn').disabled = false;
+    document.getElementById('clearBtn').style.display = 'inline-block';
+    document.getElementById('resultWrap').style.display = 'none';
+    document.getElementById('status').textContent = '';
+    document.getElementById('status').className = 'status';
   };
   reader.readAsDataURL(file);
 }
 
 async function transcribe() {
-  if (!imageBase64) return;
-  transcribeBtn.disabled = true;
-  status.textContent = 'Transcrevendo... pode levar alguns segundos.';
-  resultBox.style.display = 'block';
-  resultBox.textContent = '';
+  const apiKey = document.getElementById('apiKey').value.trim() || localStorage.getItem('anthropic_key');
+  if (!apiKey) { setStatus('Insira sua chave de API da Anthropic.', true); return; }
+  if (!imgBase64) return;
 
   const lineNum = document.getElementById('lineNum').value;
-  const lineInstruction = lineNum ? `Transcreva apenas a linha número ${lineNum} do manuscrito.` : 'Transcreva todo o texto visível no manuscrito.';
+  const lineInstr = lineNum
+    ? `Transcreva apenas a linha número ${lineNum} do manuscrito.`
+    : 'Transcreva todo o texto visível no manuscrito, linha por linha.';
 
   const prompt = `Você é um especialista em paleografia e transcrição de manuscritos históricos em português, especialmente do século XIX.
 
-${lineInstruction}
+${lineInstr}
 
 Instruções:
 - Preserve a ortografia original (não modernize)
-- Indique número de linha antes de cada linha, ex: "23: Entretanto estou no meio dos"
-- Se uma palavra for ilegível, use [ilegível]
-- Se estiver incerto, coloque a palavra entre colchetes com ponto de interrogação, ex: [palavra?]
-- Não adicione explicações, apenas a transcrição`;
+- Numere cada linha antes do texto, ex: "23: Entretanto estou no meio dos"
+- Palavra ilegível: [ilegível]
+- Palavra incerta: [palavra?]
+- Responda apenas com a transcrição, sem explicações adicionais`;
+
+  document.getElementById('transcribeBtn').disabled = true;
+  document.getElementById('resultWrap').style.display = 'block';
+  document.getElementById('resultBox').textContent = '';
+  setStatus('<span class="spinner"></span>Transcrevendo...', false, true);
 
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
+        max_tokens: 1500,
         messages: [{
           role: 'user',
           content: [
-            { type: 'image', source: { type: 'base64', media_type: imageType, data: imageBase64 } },
+            { type: 'image', source: { type: 'base64', media_type: imgType, data: imgBase64 } },
             { type: 'text', text: prompt }
           ]
         }]
       })
     });
+
     const data = await resp.json();
+    if (data.error) { setStatus('Erro: ' + data.error.message, true); return; }
+
     const text = (data.content || []).map(b => b.text || '').join('\n').trim();
-    resultBox.textContent = text || 'Não foi possível transcrever o texto.';
-    status.textContent = 'Transcrição concluída.';
-    document.getElementById('copyBtn').style.display = 'inline-flex';
-    document.getElementById('clearBtn').style.display = 'inline-flex';
+    document.getElementById('resultBox').textContent = text || 'Não foi possível transcrever.';
+    setStatus('Transcrição concluída.');
   } catch(err) {
-    resultBox.textContent = 'Erro ao transcrever. Tente novamente.';
-    status.textContent = '';
+    setStatus('Erro de conexão. Verifique sua chave e tente novamente.', true);
   }
-  transcribeBtn.disabled = false;
+
+  document.getElementById('transcribeBtn').disabled = false;
+}
+
+function setStatus(msg, isError = false, isHtml = false) {
+  const el = document.getElementById('status');
+  el.className = 'status' + (isError ? ' error' : '');
+  if (isHtml) el.innerHTML = msg;
+  else el.textContent = msg;
 }
 
 function copyText() {
-  navigator.clipboard.writeText(resultBox.textContent).then(() => {
-    status.textContent = 'Texto copiado!';
-    setTimeout(() => status.textContent = '', 2000);
+  const text = document.getElementById('resultBox').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    setStatus('Copiado!');
+    setTimeout(() => setStatus(''), 2000);
   });
 }
 
 function clearAll() {
-  imageBase64 = null; imageType = null;
-  preview.style.display = 'none';
-  preview.src = '';
-  uploadArea.style.display = 'block';
-  transcribeBtn.disabled = true;
-  resultBox.style.display = 'none';
-  document.getElementById('copyBtn').style.display = 'none';
+  imgBase64 = null; imgType = null;
+  document.getElementById('imgPreview').style.display = 'none';
+  document.getElementById('imgPreview').src = '';
+  document.getElementById('transcribeBtn').disabled = true;
   document.getElementById('clearBtn').style.display = 'none';
+  document.getElementById('resultWrap').style.display = 'none';
   document.getElementById('lineNum').value = '';
-  status.textContent = '';
-  fileInput.value = '';
+  document.getElementById('status').textContent = '';
+  document.getElementById('fileInput').value = '';
 }
 </script>
+</body>
+</html>
