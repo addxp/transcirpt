@@ -1,0 +1,159 @@
+
+<style>
+  .container { max-width: 680px; padding: 1.5rem 0; font-family: var(--font-sans); }
+  .upload-area { border: 1.5px dashed var(--color-border-secondary); border-radius: var(--border-radius-lg); padding: 2.5rem 1rem; text-align: center; cursor: pointer; transition: background 0.2s; background: var(--color-background-secondary); }
+  .upload-area:hover { background: var(--color-background-tertiary); }
+  .upload-area.dragover { border-color: #378ADD; background: #E6F1FB; }
+  #preview { max-width: 100%; border-radius: var(--border-radius-md); margin-top: 1rem; display: none; border: 0.5px solid var(--color-border-tertiary); }
+  .btn { background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 10px 20px; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.15s; color: var(--color-text-primary); }
+  .btn:hover { background: var(--color-background-secondary); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-primary { background: var(--color-text-primary); color: var(--color-background-primary); border-color: var(--color-text-primary); }
+  .btn-primary:hover { opacity: 0.85; background: var(--color-text-primary); }
+  .result-box { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem; margin-top: 1.5rem; white-space: pre-wrap; font-size: 15px; line-height: 1.8; color: var(--color-text-primary); min-height: 80px; display: none; }
+  .label { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 6px; }
+  .status { font-size: 13px; color: var(--color-text-secondary); margin-top: 8px; min-height: 18px; }
+  .toolbar { display: flex; gap: 8px; margin-top: 1rem; flex-wrap: wrap; }
+  .line-option { display: flex; gap: 8px; align-items: center; margin-top: 1rem; }
+  input[type=number] { width: 70px; padding: 6px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); font-size: 14px; }
+</style>
+
+<div class="container">
+  <h2 class="sr-only">Transcritor automático de manuscritos históricos</h2>
+
+  <p class="label">Envie uma imagem do manuscrito</p>
+  <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+    <i class="ti ti-file-text" style="font-size:32px; color: var(--color-text-secondary);" aria-hidden="true"></i>
+    <p style="margin: 8px 0 4px; font-size: 15px; color: var(--color-text-primary);">Clique ou arraste uma imagem aqui</p>
+    <p style="margin: 0; font-size: 13px; color: var(--color-text-secondary);">JPG, PNG, WEBP até 10MB</p>
+  </div>
+  <input type="file" id="fileInput" accept="image/*" style="display:none">
+  <img id="preview" alt="Pré-visualização do manuscrito">
+
+  <div class="line-option">
+    <span style="font-size:13px; color: var(--color-text-secondary);">Transcrever linha específica (opcional):</span>
+    <input type="number" id="lineNum" placeholder="ex: 23" min="1">
+    <span style="font-size:13px; color: var(--color-text-secondary);">deixe vazio para transcrever tudo</span>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn btn-primary" id="transcribeBtn" disabled onclick="transcribe()">
+      <i class="ti ti-wand" aria-hidden="true"></i> Transcrever
+    </button>
+    <button class="btn" id="copyBtn" style="display:none" onclick="copyText()">
+      <i class="ti ti-copy" aria-hidden="true"></i> Copiar
+    </button>
+    <button class="btn" id="clearBtn" style="display:none" onclick="clearAll()">
+      <i class="ti ti-refresh" aria-hidden="true"></i> Nova imagem
+    </button>
+  </div>
+  <p class="status" id="status"></p>
+
+  <div class="result-box" id="resultBox"></div>
+</div>
+
+<script>
+let imageBase64 = null;
+let imageType = null;
+
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+const preview = document.getElementById('preview');
+const transcribeBtn = document.getElementById('transcribeBtn');
+const resultBox = document.getElementById('resultBox');
+const status = document.getElementById('status');
+
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+
+function handleFile(file) {
+  if (!file || !file.type.startsWith('image/')) { status.textContent = 'Por favor, envie uma imagem válida.'; return; }
+  imageType = file.type;
+  const reader = new FileReader();
+  reader.onload = e => {
+    imageBase64 = e.target.result.split(',')[1];
+    preview.src = e.target.result;
+    preview.style.display = 'block';
+    uploadArea.style.display = 'none';
+    transcribeBtn.disabled = false;
+    resultBox.style.display = 'none';
+    document.getElementById('copyBtn').style.display = 'none';
+    document.getElementById('clearBtn').style.display = 'none';
+    status.textContent = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function transcribe() {
+  if (!imageBase64) return;
+  transcribeBtn.disabled = true;
+  status.textContent = 'Transcrevendo... pode levar alguns segundos.';
+  resultBox.style.display = 'block';
+  resultBox.textContent = '';
+
+  const lineNum = document.getElementById('lineNum').value;
+  const lineInstruction = lineNum ? `Transcreva apenas a linha número ${lineNum} do manuscrito.` : 'Transcreva todo o texto visível no manuscrito.';
+
+  const prompt = `Você é um especialista em paleografia e transcrição de manuscritos históricos em português, especialmente do século XIX.
+
+${lineInstruction}
+
+Instruções:
+- Preserve a ortografia original (não modernize)
+- Indique número de linha antes de cada linha, ex: "23: Entretanto estou no meio dos"
+- Se uma palavra for ilegível, use [ilegível]
+- Se estiver incerto, coloque a palavra entre colchetes com ponto de interrogação, ex: [palavra?]
+- Não adicione explicações, apenas a transcrição`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: imageType, data: imageBase64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+    const data = await resp.json();
+    const text = (data.content || []).map(b => b.text || '').join('\n').trim();
+    resultBox.textContent = text || 'Não foi possível transcrever o texto.';
+    status.textContent = 'Transcrição concluída.';
+    document.getElementById('copyBtn').style.display = 'inline-flex';
+    document.getElementById('clearBtn').style.display = 'inline-flex';
+  } catch(err) {
+    resultBox.textContent = 'Erro ao transcrever. Tente novamente.';
+    status.textContent = '';
+  }
+  transcribeBtn.disabled = false;
+}
+
+function copyText() {
+  navigator.clipboard.writeText(resultBox.textContent).then(() => {
+    status.textContent = 'Texto copiado!';
+    setTimeout(() => status.textContent = '', 2000);
+  });
+}
+
+function clearAll() {
+  imageBase64 = null; imageType = null;
+  preview.style.display = 'none';
+  preview.src = '';
+  uploadArea.style.display = 'block';
+  transcribeBtn.disabled = true;
+  resultBox.style.display = 'none';
+  document.getElementById('copyBtn').style.display = 'none';
+  document.getElementById('clearBtn').style.display = 'none';
+  document.getElementById('lineNum').value = '';
+  status.textContent = '';
+  fileInput.value = '';
+}
+</script>
